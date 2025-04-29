@@ -1,10 +1,10 @@
 pipeline {
-    agent any
+    agent any  // Use any available agent
 
     tools {
-        gradle 'Gradle'  // Ensure Gradle is installed and configured in Jenkins (Global Tool Config)
+        gradle 'Gradle'  // Ensure this matches the name configured in Jenkins
+        jdk 'JDK'
     }
-
     stages {
         stage('Checkout') {
             steps {
@@ -12,35 +12,35 @@ pipeline {
             }
         }
 
-        stage('Init from POM (if needed)') {
-            steps {
-                sh 'gradle init --type pom'
-            }
-        }
-
         stage('Build') {
             steps {
-                sh './gradlew build'
+                sh 'gradle build'  // Run Maven build
             }
         }
 
-        stage('Run JAR') {
+       stage('Test') {
+           steps {
+               sh 'gradle test'  // Run unit tests
+           }
+        }
+
+              
+        stage('Run Application') {
             steps {
-                script {
-                    // Replace with your actual JAR name if needed
-                    def jarFile = sh(script: "ls build/libs/*.jar", returnStdout: true).trim()
-                    sh "java -jar ${jarFile}"
-                }
+                // Start the JAR application
+                sh 'gradle run'
             }
         }
+
+        
     }
 
     post {
         success {
-            echo 'Gradle build and run completed successfully!'
+            echo 'Build and deployment successful!'
         }
         failure {
-            echo 'Gradle build or execution failed.'
+            echo 'Build failed!'
         }
     }
 }
